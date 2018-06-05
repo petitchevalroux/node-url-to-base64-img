@@ -2,14 +2,9 @@
 const cheerio = require("cheerio"),
     Promise = require("bluebird"),
     Url = require("url"),
-    path = require("path"),
-    Downloader = require(path.join(__dirname, "downloader"));
+    imageDataURI = require("image-data-uri");
 class ImgUrlToBase64Converter {
-    constructor() {
-        this.downloader = new Downloader();
-    }
     replace(html, url) {
-        const self = this;
         try {
             const $ = cheerio.load(html),
                 promises = [],
@@ -22,17 +17,10 @@ class ImgUrlToBase64Converter {
                         const downloadUrl = url ? Url.resolve(url, src) :
                             src;
                         promises.push(
-                            self
-                                .downloader
-                                .get(downloadUrl)
-                                .then(response => {
-                                    $img.attr("src", "data:" +
-                                    response.headers[
-                                        "content-type"] +
-                                    ";base64," + Buffer.from(
-                                            response.body)
-                                            .toString("base64"));
-                                    return response;
+                            imageDataURI.encodeFromURL(downloadUrl)
+                                .then(dataUri => {
+                                    $img.attr("src", dataUri);
+                                    return dataUri;
                                 })
                         );
                     }

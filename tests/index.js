@@ -4,7 +4,8 @@ const path = require("path"),
     assert = require("assert"),
     cheerio = require("cheerio"),
     sinon = require("sinon"),
-    nock = require("nock");
+    nock = require("nock"),
+    fs = require("fs");
 
 describe("ImgUrlToBase64Converter", () => {
     const sandbox = sinon.sandbox.create();
@@ -89,6 +90,29 @@ describe("ImgUrlToBase64Converter", () => {
                 "<html><body><h1>Title 1</h1></body></html>")
             .then(html => {
                 assert(html.indexOf("<body>") > -1);
+                return html;
+            });
+    });
+
+    it("generate the same html", () => {
+        nock("http://example.com")
+            .get("/izsak-pulugor-621460-unsplash.jpg")
+            .replyWithFile(
+                200,
+                path.join(__dirname,
+                    "izsak-pulugor-621460-unsplash.jpg"), {
+                    "Content-Type": "image/jpeg"
+                }
+            );
+        return converter
+            .replace(
+                "<img src=\"http://example.com/izsak-pulugor-621460-unsplash.jpg\">"
+            )
+            .then(html => {
+                assert.equal(html, fs.readFileSync(path.join(
+                    __dirname,
+                    "izsak-pulugor-621460-unsplash.html"
+                )));
                 return html;
             });
     });
