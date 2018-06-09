@@ -117,4 +117,25 @@ describe("ImgUrlToBase64Converter", () => {
             });
     });
 
+    it("do not encode non ascii char as entites", () => {
+        return converter
+            .replace("é")
+            .then(html => {
+                assert.equal(html, "é");
+                return html;
+            });
+    });
+
+    it("support htmlParserOptions", () => {
+        return new Converter({
+            htmlParserOptions: {
+                decodeEntities: true
+            }
+        })
+            .replace("é")
+            .then(html => {
+                assert.equal(html, "&#xE9;");
+                return html;
+            });
+    });
 });

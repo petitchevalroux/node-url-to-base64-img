@@ -4,9 +4,19 @@ const cheerio = require("cheerio"),
     Url = require("url"),
     imageDataURI = require("image-data-uri");
 class ImgUrlToBase64Converter {
+    constructor(options) {
+        if (options && options.htmlParserOptions) {
+            this.htmlParserOptions = options.htmlParserOptions;
+        }
+        // default decodeEntities = false in order to avoid non ascii chars to entities conversion
+        this.htmlParserOptions = options && options.htmlParserOptions ?
+            options.htmlParserOptions : {
+                decodeEntities: false
+            };
+    }
     replace(html, url) {
         try {
-            const $ = cheerio.load(html),
+            const $ = cheerio.load(html, this.htmlParserOptions),
                 promises = [],
                 hasBody = html.indexOf("<body>") > -1;
             $("img")
